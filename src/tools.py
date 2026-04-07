@@ -33,6 +33,52 @@ def get_talks_by_day(day) -> list[dict]:
     return results
 
 
+def get_all_talks() -> list[dict]:
+    """Return all talks in the agenda."""
+    connection = sqlite3.connect(database_file)
+    cursor = connection.cursor()
+
+    cursor.execute(
+        "SELECT title, start_time, speakers, topic FROM talks ORDER BY day, start_time"
+    )
+    rows = cursor.fetchall()
+    connection.close()
+
+    results = [
+        {
+            "title": row[0],
+            "start_time": row[1],
+            "speakers": row[2],
+            "topic": row[3],
+        }
+        for row in rows
+    ]
+    return results
+
+
+def get_talk_details(title) -> dict:
+    """Return day, start time, description and speakers for a talk matching the given title."""
+    connection = sqlite3.connect(database_file)
+    cursor = connection.cursor()
+
+    cursor.execute(
+        "SELECT day, start_time, description, speakers FROM talks WHERE title LIKE ?",
+        (f"%{title}%",),
+    )
+    row = cursor.fetchone()
+    connection.close()
+
+    if not row:
+        return {"error": f"No talk found matching '{title}'"}
+
+    return {
+        "day": row[0],
+        "start_time": row[1],
+        "description": row[2],
+        "speakers": row[3],
+    }
+
+
 # --- Tool schema ---
 # This tells the LLM what tools are available, what they do,
 # and what parameters they expect.
@@ -51,6 +97,28 @@ tools = [
             },
             "required": ["day"]
         }
+    },
+    {
+        "name": "get_all_talks",
+        "description": "Get all talks in the agenda. Returns a list with each talk's title, start time, speakers, and topic.",
+        "input_schema": {
+            "type": "object",
+            "properties": {}
+        }
+    },
+    {
+        "name": "get_talk_details",
+        "description": "Get details of a specific talk by title. Returns the day, start time, description, and speakers. Supports partial title matching.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "title": {
+                    "type": "string",
+                    "description": "The title (or part of the title) of the talk to search for"
+                }
+            },
+            "required": ["title"]
+        }
     }
 ]
 
@@ -60,7 +128,9 @@ tools = [
 # execute_tool looks up the function by name and calls it.
 
 tool_functions = {
-    "get_talks_by_day": get_talks_by_day
+    "get_talks_by_day": get_talks_by_day,
+    "get_all_talks": get_all_talks,
+    "get_talk_details": get_talk_details
 }
 
 
