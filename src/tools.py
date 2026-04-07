@@ -39,7 +39,7 @@ def get_all_talks() -> list[dict]:
     cursor = connection.cursor()
 
     cursor.execute(
-        "SELECT title, start_time, speakers, topic FROM talks ORDER BY day, start_time"
+        "SELECT title, day, start_time, speakers, topic FROM talks ORDER BY day, start_time"
     )
     rows = cursor.fetchall()
     connection.close()
@@ -47,9 +47,10 @@ def get_all_talks() -> list[dict]:
     results = [
         {
             "title": row[0],
-            "start_time": row[1],
-            "speakers": row[2],
-            "topic": row[3],
+            "day": row[1],
+            "start_time": row[2],
+            "speakers": row[3],
+            "topic": row[4],
         }
         for row in rows
     ]
@@ -100,7 +101,7 @@ tools = [
     },
     {
         "name": "get_all_talks",
-        "description": "Get all talks in the agenda. Returns a list with each talk's title, start time, speakers, and topic.",
+        "description": "Get all talks in the agenda. Returns a list with each talk's day, title, start time, speakers, and topic.",
         "input_schema": {
             "type": "object",
             "properties": {}

@@ -39,6 +39,7 @@ def test_get_all_talks():
 
     assert len(talks) == 38
     assert talks[0]["start_time"] == test_data[0]["start_time"]
+    assert talks[0]["day"] == event_day
 
 
 def test_get_talk_details_with_partial_title():
