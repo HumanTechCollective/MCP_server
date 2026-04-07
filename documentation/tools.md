@@ -1,4 +1,4 @@
-# Tool use: comparing providers
+# Tools
 
 ## What is tool use?
 

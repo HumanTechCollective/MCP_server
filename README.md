@@ -13,15 +13,21 @@ This project is also a reusable template for building MCP servers.
 ## Repository layout
 
 ```
-├── data/                  # Data sources and agenda files
-├── documentation/         # Workshop instructions, slides, and reference docs
-│   ├── slides.md          # Slide descriptions for the workshop presentation
-│   ├── tools.md           # Tool use comparison across LLM providers
-│   └── workshop.md        # Step-by-step workshop instructions
-├── scripts/               # Utility scripts (data download, etc.)
-├── learning.md            # Learning tracker — concepts and reading list
-├── ROADMAP.md             # Project iterations and plan
-└── CLAUDE.md              # AI assistant working conventions
+├── data/
+│   ├── sample_database.db     # SQLite database with sample agenda data
+│   └── sample_talks.json      # Sample agenda data in JSON
+├── documentation/
+│   ├── tools.md               # What are tools and how they work
+│   ├── workshop.md            # Step-by-step workshop instructions (English)
+│   └── workshop_es.md         # Step-by-step workshop instructions (Spanish)
+├── src/
+│   ├── client.py              # LLM client with tool calling
+│   ├── config.py              # Configuration (Ollama URL, model, etc.)
+│   └── tools.py               # Tool functions, schemas, and execution
+├── tests/
+│   ├── test_client.py         # Client tests
+│   └── test_tools.py          # Tool function tests
+└── .env.sample                # Environment variables template
 ```
 
 ## Setup
@@ -30,5 +36,5 @@ This project is also a reusable template for building MCP servers.
 python3 -m venv .venv
 source .venv/bin/activate
 pip install --upgrade pip
-pip install pytest dotenv langchain_core langchain_ollama
+pip install pytest python-dotenv langchain_core langchain_ollama
 ```
