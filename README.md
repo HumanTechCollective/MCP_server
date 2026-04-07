@@ -30,5 +30,5 @@ This project is also a reusable template for building MCP servers.
 python3 -m venv .venv
 source .venv/bin/activate
 pip install --upgrade pip
-pip install pytest
+pip install pytest dotenv langchain_core langchain_ollama
 ```

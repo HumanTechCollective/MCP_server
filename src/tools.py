@@ -3,7 +3,7 @@
 import json
 import sqlite3
 
-DB_FILE = "data/sample_database.db"
+from src.config import database_file
 
 
 # --- Tool functions ---
@@ -11,7 +11,7 @@ DB_FILE = "data/sample_database.db"
 
 def get_talks_by_day(day) -> list[dict]:
     """Return all talks for a given day."""
-    connection = sqlite3.connect(DB_FILE)
+    connection = sqlite3.connect(database_file)
     cursor = connection.cursor()
 
     cursor.execute(
