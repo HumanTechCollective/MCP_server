@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "agenda": {
+      "command": "${HOME}/MCP_server/.venv/bin/python",
+      "args": ["-m", "src.MCP_server"],
+      "cwd": "${HOME}/MCP_server"
+    }
+  }
+}

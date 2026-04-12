@@ -28,7 +28,8 @@ This project is also a reusable template for building MCP servers.
 ├── tests/
 │   ├── test_client.py         # Client tests
 │   └── test_tools.py          # Tool function tests
-└── .env.sample                # Environment variables template
+├── .env.sample                # Environment variables template
+└── .mcp.json                  # MCP server config for Claude Code
 ```
 
 ## Setup
