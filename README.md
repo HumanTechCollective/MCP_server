@@ -38,3 +38,9 @@ source .venv/bin/activate
 pip install --upgrade pip
 pip install pytest python-dotenv langchain_core langchain_ollama
 ```
+
+## Try the chatbot
+```bash
+source .venv/bin/activate
+python -m src.client
+```

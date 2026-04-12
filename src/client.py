@@ -1,9 +1,9 @@
 """Simple client that sends queries to an LLM with tool access."""
 
 from langchain_ollama import ChatOllama
-from langchain_core.messages import HumanMessage, ToolMessage
+from langchain_core.messages import HumanMessage, SystemMessage, ToolMessage
 
-from src.config import ollama_url, ollama_api_key, ollama_model
+from src.config import ollama_url, ollama_api_key, ollama_model, system_prompt
 from src.tools import tools, execute_tool
 
 
@@ -26,7 +26,7 @@ def process_query(query) -> str:
     # Bind our tool schemas so the LLM knows what it can call
     llm_with_tools = llm.bind_tools(tools)
 
-    messages = [HumanMessage(content=query)]
+    messages = [SystemMessage(content=system_prompt), HumanMessage(content=query)]
 
     # Loop: send message, execute tool calls, repeat until we get a text answer
     while True:
