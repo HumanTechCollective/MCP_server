@@ -23,7 +23,8 @@ This project is also a reusable template for building MCP servers.
 ├── src/
 │   ├── client.py              # LLM client with tool calling
 │   ├── config.py              # Configuration (Ollama URL, model, etc.)
-│   └── tools.py               # Tool functions, schemas, and execution
+│   ├── tools.py               # Tool functions, schemas, and execution
+│   └── MCP_server.py          # MCP server exposing the agenda tools
 ├── tests/
 │   ├── test_client.py         # Client tests
 │   └── test_tools.py          # Tool function tests
@@ -36,7 +37,7 @@ This project is also a reusable template for building MCP servers.
 python3 -m venv .venv
 source .venv/bin/activate
 pip install --upgrade pip
-pip install pytest python-dotenv langchain_core langchain_ollama
+pip install pytest python-dotenv langchain_core langchain_ollama "mcp[cli]"
 ```
 
 ### LLM setup
@@ -86,11 +87,20 @@ OLLAMA_API_KEY=
 > [src/config.py](src/config.py).
 
 
+## Run the MCP server
+
+The MCP server exposes the agenda tools over the Model Context Protocol so any
+MCP-compatible client can use them.
+
+Run it from the project root:
+
+```bash
+source .venv/bin/activate
+python -m src.MCP_server
+```
+
 ## Try the chatbot
 ```bash
 source .venv/bin/activate
 python -m src.client
 ```
-
-
-
