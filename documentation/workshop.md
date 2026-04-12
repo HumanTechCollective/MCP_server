@@ -29,7 +29,7 @@ cd MCP_server
 python3 -m venv .venv
 source .venv/bin/activate
 pip install --upgrade pip
-pip install pytest python-dotenv langchain_core langchain_ollama
+pip install pytest python-dotenv langchain_core langchain_ollama "mcp[cli]"
 ```
 
 ### LLM setup
@@ -149,3 +149,76 @@ Notice how the LLM decides which tool to call based on your question — you don
 tell it which tool to use.
 
 Type `quit` to exit.
+
+
+## 3. MCP server
+
+To share our tools with any Model Context Protocol (MCP) compatible app, we wrap them in an MCP server.
+
+Open [src/MCP_server.py](../src/MCP_server.py). It is mostly a copy of
+[src/tools.py](../src/tools.py) with a few small changes:
+
+**1. Create the server**
+
+```python
+from mcp.server.fastmcp import FastMCP
+
+mcp = FastMCP("agenda")
+```
+
+`FastMCP` is the high-level server class from the MCP SDK. The name (`"agenda"`)
+identifies this server to clients.
+
+**2. Register each tool with a decorator**
+
+```python
+@mcp.tool()
+def get_all_talks() -> list[dict]:
+    """Return all talks in the agenda."""
+    ...
+```
+
+The `@mcp.tool()` decorator registers the function as an MCP tool. 
+FastMCP generates the tool schema automatically — so the manual `tools_schema` 
+list and `tool_mapping` dictionary from `src/tools.py` are no longer needed.
+
+**3. Run the server**
+
+```python
+if __name__ == "__main__":
+    mcp.run(transport='stdio')
+```
+
+`stdio` means the server talks to its client over standard input/output. The
+client launches the server as a subprocess and exchanges MCP messages through
+its pipes. This is the simplest transport; MCP also supports HTTP for remote
+servers.
+
+Start the server:
+
+```bash
+python -m src.MCP_server
+```
+
+It will sit waiting for an MCP client to connect. Press `Ctrl+C` to stop.
+
+### Optional: connect it to Claude Code
+
+If you use Claude Code, you can let it call these tools directly. Create
+`.mcp.json` at the repo root:
+
+```json
+{
+  "mcpServers": {
+    "agenda": {
+      "command": "${HOME}/MCP_server/.venv/bin/python",
+      "args": ["-m", "src.MCP_server"],
+      "cwd": "${HOME}/MCP_server"
+    }
+  }
+}
+```
+
+Adjust the paths to match where you cloned the repo. Restart Claude Code and ask
+it about the agenda — it will launch the server and call the MCP tools to
+answer.
