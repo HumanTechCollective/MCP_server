@@ -40,12 +40,6 @@ Copy `.env.sample` to `.env` and fill in your Ollama Cloud URL, API key, and mod
 cp .env.sample .env
 ```
 
-Import the sample data into the database:
-
-```bash
-python scripts/import_talks.py
-```
-
 ## 1. Tools
 
 Tools are functions that you make available to an LLM. The LLM can't run them — it

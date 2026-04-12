@@ -40,12 +40,6 @@ Copia `.env.sample` a `.env` y rellena la URL de Ollama Cloud, la clave de API y
 cp .env.sample .env
 ```
 
-Importa los datos de ejemplo en la base de datos:
-
-```bash
-python scripts/import_talks.py
-```
-
 ## 1. Herramientas (Tools)
 
 Las herramientas son funciones que pones a disposición de un LLM. El LLM no puede
