@@ -1,6 +1,6 @@
 # MCP Server 
 
-A Model Context Protocol (MCP) server built with Python that serves agenda data for an event. 
+A Model Context Protocol (MCP) server built with Python that serves agenda data for an event.  
 This project is also a reusable template for building MCP servers.
 
 ## Goals
@@ -39,8 +39,58 @@ pip install --upgrade pip
 pip install pytest python-dotenv langchain_core langchain_ollama
 ```
 
+### LLM setup
+
+Copy `.env.sample` to `.env`:
+
+```bash
+cp .env.sample .env
+```
+
+You have two options for the LLM backend:
+
+#### Option 1: Ollama Cloud
+
+Create an account at [ollama.com](https://ollama.com) and get an [API key](https://ollama.com/settings/keys).
+
+Fill your `.env`:
+
+```
+OLLAMA_URL=https://ollama.com
+OLLAMA_API_KEY=<your API key>
+```
+
+> **Note:** Other providers (OpenAI, Anthropic, etc.) require small changes in [src/client.py](src/client.py).  
+> Check [Langchain documentation for chat models integrations](https://docs.langchain.com/oss/python/integrations/chat).
+
+#### Option 2: Your own Ollama server
+
+Install Ollama and pull a model:
+
+```bash
+sudo apt install curl
+curl -fsSL https://ollama.com/install.sh | sh
+ollama pull gemma4
+```
+
+Fill your `.env`:
+
+```
+OLLAMA_URL=http://localhost:11434
+OLLAMA_API_KEY=
+```
+
+> **Note:** You can use a smaller model instead of `gemma4`. Browse the available
+> [models with tool support](https://ollama.com/search?c=tools).  
+> To use a different model, pull it with `ollama pull <model>` and update the model name in
+> [src/config.py](src/config.py).
+
+
 ## Try the chatbot
 ```bash
 source .venv/bin/activate
 python -m src.client
 ```
+
+
+

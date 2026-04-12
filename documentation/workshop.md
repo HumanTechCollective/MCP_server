@@ -32,13 +32,49 @@ pip install --upgrade pip
 pip install pytest python-dotenv langchain_core langchain_ollama
 ```
 
-Create an account at [ollama.com](https://ollama.com) and get an API key (https://ollama.com/settings/keys).
+### LLM setup
 
-Copy `.env.sample` to `.env` and fill in your Ollama Cloud URL, API key, and model:
+Copy `.env.sample` to `.env`:
 
 ```bash
 cp .env.sample .env
 ```
+
+You have two options for the LLM backend:
+
+#### Option 1: Ollama Cloud
+
+Create an account at [ollama.com](https://ollama.com) and get an [API key](https://ollama.com/settings/keys).
+
+Fill your `.env`:
+
+```
+OLLAMA_URL=https://ollama.com
+OLLAMA_API_KEY=<your API key>
+```
+
+#### Option 2: Your own Ollama server
+
+Install Ollama and pull a model:
+
+```bash
+sudo apt install curl
+curl -fsSL https://ollama.com/install.sh | sh
+ollama pull gemma4
+```
+
+Fill your `.env`:
+
+```
+OLLAMA_URL=http://localhost:11434
+OLLAMA_API_KEY=
+```
+
+> **Note:** You can use a smaller model instead of `gemma4`. Browse the available
+> [models with tool support](https://ollama.com/search?c=tools). To use a different
+> model, pull it with `ollama pull <model>` and update the model name in
+> [src/config.py](src/config.py).
+
 
 ## 1. Tools
 
