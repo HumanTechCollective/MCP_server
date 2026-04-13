@@ -119,7 +119,7 @@ Para invocar las herramientas necesitamos un cliente LLM. El cliente es la pieza
 se sitúa entre el usuario y el LLM, gestionando el ir y venir de las llamadas a
 herramientas.
 
-Abre `src/client.py` y léelo. El cliente conecta el LLM con las herramientas:
+Abre `src/tools_client.py` y léelo. El cliente conecta el LLM con las herramientas:
 
 - `create_llm()` — crea una conexión a un servidor Ollama usando la configuración
   de `src/config.py`.
@@ -131,13 +131,13 @@ Abre `src/client.py` y léelo. El cliente conecta el LLM con las herramientas:
 Ejecuta los tests:
 
 ```bash
-python -m pytest tests/test_client.py -v
+python -m pytest tests/test_tools_client.py -v
 ```
 
 Ejecuta el cliente de forma interactiva:
 
 ```bash
-python -m src.client
+python -m src.tools_client
 ```
 
 Prueba algunas consultas:

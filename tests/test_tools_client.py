@@ -2,7 +2,7 @@
 
 from langchain_ollama import ChatOllama
 
-from src.client import create_llm, process_query
+from src.tools_client import create_llm, process_query
 
 
 def test_create_llm_returns_chat_ollama():

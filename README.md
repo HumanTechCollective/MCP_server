@@ -21,12 +21,12 @@ This project is also a reusable template for building MCP servers.
 │   ├── workshop.md            # Step-by-step workshop instructions (English)
 │   └── workshop_es.md         # Step-by-step workshop instructions (Spanish)
 ├── src/
-│   ├── client.py              # LLM client with tool calling
+│   ├── tools_client.py         # LLM client with tool calling
 │   ├── config.py              # Configuration (Ollama URL, model, etc.)
 │   ├── tools.py               # Tool functions, schemas, and execution
 │   └── MCP_server.py          # MCP server exposing the agenda tools
 ├── tests/
-│   ├── test_client.py         # Client tests
+│   ├── test_tools_client.py    # Client tests
 │   └── test_tools.py          # Tool function tests
 ├── .env.sample                # Environment variables template
 └── .mcp.json                  # MCP server config for Claude Code
@@ -62,7 +62,7 @@ OLLAMA_URL=https://ollama.com
 OLLAMA_API_KEY=<your API key>
 ```
 
-> **Note:** Other providers (OpenAI, Anthropic, etc.) require small changes in [src/client.py](src/client.py).  
+> **Note:** Other providers (OpenAI, Anthropic, etc.) require small changes in [src/tools_client.py](src/tools_client.py).  
 > Check [Langchain documentation for chat models integrations](https://docs.langchain.com/oss/python/integrations/chat).
 
 #### Option 2: Your own Ollama server
@@ -103,5 +103,5 @@ python -m src.MCP_server
 ## Try the chatbot
 ```bash
 source .venv/bin/activate
-python -m src.client
+python -m src.tools_client
 ```

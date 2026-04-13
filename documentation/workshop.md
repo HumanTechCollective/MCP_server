@@ -118,7 +118,7 @@ python -m pytest tests/test_tools.py -v
 To invoke the tools we need an LLM client. The client is the piece that sits between
 the user and the LLM, handling the back-and-forth of tool calls.
 
-Open `src/client.py` and read through it. The client connects the LLM to the tools:
+Open `src/tools_client.py` and read through it. The client connects the LLM to the tools:
 
 - `create_llm()` — creates a connection to an Ollama server using the configuration
   in `src/config.py`.
@@ -130,13 +130,13 @@ Open `src/client.py` and read through it. The client connects the LLM to the too
 Run the tests:
 
 ```bash
-python -m pytest tests/test_client.py -v
+python -m pytest tests/test_tools_client.py -v
 ```
 
 Run the client interactively:
 
 ```bash
-python -m src.client
+python -m src.tools_client
 ```
 
 Try some queries:
