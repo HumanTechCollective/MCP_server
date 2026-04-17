@@ -2,11 +2,11 @@ import os
 import json
 import sqlite3
 from mcp.server.fastmcp import FastMCP
-from src.config import database_file
+from src.config import database_file, mcp_host, mcp_port
 
 
 # Initialize FastMCP server
-mcp = FastMCP("agenda", host="127.0.0.1", port=8000)
+mcp = FastMCP("agenda", host=mcp_host, port=mcp_port)
 
 # --- Tool functions ---
 """Tool functions that query the agenda database."""

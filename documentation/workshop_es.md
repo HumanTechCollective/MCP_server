@@ -244,6 +244,10 @@ escucha en `http://127.0.0.1:8000/mcp`, y los clientes se conectan por HTTP.
 Esto es lo que permite tener servidores MCP *remotos* (alojados en otro sitio,
 compartidos entre clientes).
 
+> **Nota:** El host y el puerto están definidos en [src/config.py](../src/config.py)
+> como `mcp_host` y `mcp_port`, y la URL completa como `mcp_server_url`.
+> Cámbialos ahí si necesitas un host o puerto diferente.
+
 Inicia el servidor:
 
 ```bash

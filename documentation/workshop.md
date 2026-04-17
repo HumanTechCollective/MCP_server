@@ -240,6 +240,10 @@ With `streamable-http`, the server runs as a standalone web process listening
 on `http://127.0.0.1:8000/mcp`, and clients connect over HTTP. This is what
 enables *remote* MCP servers (hosted elsewhere, shared across clients).
 
+> **Note:** The host and port are defined in [src/config.py](../src/config.py)
+> as `mcp_host` and `mcp_port`, and the full URL is exposed as `mcp_server_url`.
+> Change them there if you need a different host or port.
+
 Start the server:
 
 ```bash
