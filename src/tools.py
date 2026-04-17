@@ -15,7 +15,8 @@ def get_talks_by_day(day) -> list[dict]:
     cursor = connection.cursor()
 
     cursor.execute(
-        "SELECT title, start_time, speakers, topic FROM talks WHERE day = ? ORDER BY start_time",
+        "SELECT title, start_time, speakers, topic, stage, languages "
+        "FROM talks WHERE day = ? ORDER BY start_time",
         (day,)
     )
     rows = cursor.fetchall()
@@ -27,6 +28,8 @@ def get_talks_by_day(day) -> list[dict]:
             "start_time": row[1],
             "speakers": row[2],
             "topic": row[3],
+            "stage": row[4],
+            "languages": row[5],
         }
         for row in rows
     ]
@@ -58,12 +61,13 @@ def get_all_talks() -> list[dict]:
 
 
 def get_talk_details(title) -> dict:
-    """Return day, start time, description and speakers for a talk matching the given title."""
+    """Return full details for a talk matching the given title."""
     connection = sqlite3.connect(database_file)
     cursor = connection.cursor()
 
     cursor.execute(
-        "SELECT day, start_time, description, speakers FROM talks WHERE title LIKE ?",
+        "SELECT day, start_time, end_time, description, speakers, stage, languages "
+        "FROM talks WHERE title LIKE ?",
         (f"%{title}%",),
     )
     row = cursor.fetchone()
@@ -75,8 +79,11 @@ def get_talk_details(title) -> dict:
     return {
         "day": row[0],
         "start_time": row[1],
-        "description": row[2],
-        "speakers": row[3],
+        "end_time": row[2],
+        "description": row[3],
+        "speakers": row[4],
+        "stage": row[5],
+        "languages": row[6],
     }
 
 
@@ -87,7 +94,7 @@ def get_talk_details(title) -> dict:
 tools = [
     {
         "name": "get_talks_by_day",
-        "description": "Get all talks scheduled for a given day. Returns a list with each talk's title, start time, speakers, and topic.",
+        "description": "Get all talks scheduled for a given day. Returns a list with each talk's title, start time, speakers, topic, stage (room), and languages.",
         "input_schema": {
             "type": "object",
             "properties": {
@@ -109,7 +116,7 @@ tools = [
     },
     {
         "name": "get_talk_details",
-        "description": "Get details of a specific talk by title. Returns the day, start time, description, and speakers. Supports partial title matching.",
+        "description": "Get details of a specific talk by title. Returns the day, start time, end time, description, speakers, stage (room), and languages. Supports partial title matching.",
         "input_schema": {
             "type": "object",
             "properties": {

@@ -29,4 +29,5 @@ def test_call_get_talks_by_day_returns_talks():
     # FastMCP returns list[dict] under structuredContent["result"]
     talks = result.structuredContent["result"]
     assert len(talks) > 0
-    assert talks[0].keys() == {"title", "start_time", "speakers", "topic"}
+    for key in ("title", "start_time", "speakers", "topic", "stage", "languages"):
+        assert key in talks[0]
