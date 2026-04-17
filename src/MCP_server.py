@@ -6,8 +6,7 @@ from src.config import database_file
 
 
 # Initialize FastMCP server
-mcp = FastMCP("agenda")
-
+mcp = FastMCP("agenda", host="127.0.0.1", port=8000)
 
 # --- Tool functions ---
 """Tool functions that query the agenda database."""
@@ -86,4 +85,4 @@ def get_talk_details(title) -> dict:
 
 if __name__ == "__main__":
     # Initialize and run the server
-    mcp.run(transport='stdio')
+    mcp.run(transport='streamable-http')

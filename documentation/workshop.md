@@ -184,6 +184,11 @@ list and `tool_mapping` dictionary from `src/tools.py` are no longer needed.
 
 **3. Run the server**
 
+MCP supports two main transports: **stdio** (simpler, local only) and **HTTP**
+(for remote servers). We'll show both.
+
+### 3.1 stdio transport
+
 ```python
 if __name__ == "__main__":
     mcp.run(transport='stdio')
@@ -191,8 +196,7 @@ if __name__ == "__main__":
 
 `stdio` means the server talks to its client over standard input/output. The
 client launches the server as a subprocess and exchanges MCP messages through
-its pipes. This is the simplest transport; MCP also supports HTTP for remote
-servers.
+its pipes. This is the simplest transport.
 
 Start the server:
 
@@ -202,7 +206,7 @@ python -m src.MCP_server
 
 It will sit waiting for an MCP client to connect. Press `Ctrl+C` to stop.
 
-### Optional: connect it to Claude Code
+#### Optional: connect it to Claude Code
 
 If you use Claude Code, you can let it call these tools directly. Create
 `.mcp.json` at the repo root:
@@ -222,3 +226,44 @@ If you use Claude Code, you can let it call these tools directly. Create
 Adjust the paths to match where you cloned the repo. Restart Claude Code and ask
 it about the agenda — it will launch the server and call the MCP tools to
 answer.
+
+### 3.2 HTTP transport
+
+Change the transport:
+
+```python
+if __name__ == "__main__":
+    mcp.run(transport='streamable-http')
+```
+
+With `streamable-http`, the server runs as a standalone web process listening
+on `http://127.0.0.1:8000/mcp`, and clients connect over HTTP. This is what
+enables *remote* MCP servers (hosted elsewhere, shared across clients).
+
+Start the server:
+
+```bash
+python -m src.MCP_server
+```
+
+> **Note:** Visiting `http://127.0.0.1:8000/mcp` in a browser will return a
+> `406 Not Acceptable` error. That is expected — the endpoint requires MCP
+> headers (`Accept: application/json, text/event-stream`) that browsers don't
+> send. The 406 means the server is running correctly.
+
+#### Optional: connect it to Claude Code
+
+Update `.mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "agenda": {
+      "type": "http",
+      "url": "http://127.0.0.1:8000/mcp"
+    }
+  }
+}
+```
+
+Make sure the server is running before Claude Code connects.

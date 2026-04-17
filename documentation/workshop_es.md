@@ -187,6 +187,11 @@ ya no son necesarios.
 
 **3. Ejecutar el servidor**
 
+MCP admite dos transportes principales: **stdio** (más simple, solo local) y
+**HTTP** (para servidores remotos). Mostraremos ambos.
+
+### 3.1 Transporte stdio
+
 ```python
 if __name__ == "__main__":
     mcp.run(transport='stdio')
@@ -194,8 +199,7 @@ if __name__ == "__main__":
 
 `stdio` significa que el servidor se comunica con su cliente a través de la
 entrada/salida estándar. El cliente lanza el servidor como un subproceso e
-intercambia mensajes MCP a través de sus tuberias (pipes). Este es el método más
-simple; MCP también admite HTTP para servidores remotos.
+intercambia mensajes MCP a través de sus tuberías (pipes). Este es el método más simple.
 
 Inicia el servidor:
 
@@ -205,7 +209,7 @@ python -m src.MCP_server
 
 Se quedará esperando a que un cliente MCP se conecte. Pulsa `Ctrl+C` para detenerlo.
 
-### Opcional: conectarlo a Claude Code
+#### Opcional: conectarlo a Claude Code
 
 Si usas Claude Code, puedes permitirle llamar a estas herramientas directamente.
 Crea `.mcp.json` en la raíz del repositorio:
@@ -225,3 +229,45 @@ Crea `.mcp.json` en la raíz del repositorio:
 Ajusta las rutas para que coincidan con el lugar donde clonaste el repositorio.
 Reinicia Claude Code y pregúntale sobre la agenda — lanzará el servidor y
 llamará a las herramientas MCP para responder.
+
+### 3.2 Transporte HTTP
+
+Cambia el transporte:
+
+```python
+if __name__ == "__main__":
+    mcp.run(transport='streamable-http')
+```
+
+Con `streamable-http`, el servidor se ejecuta como un proceso web autónomo que
+escucha en `http://127.0.0.1:8000/mcp`, y los clientes se conectan por HTTP.
+Esto es lo que permite tener servidores MCP *remotos* (alojados en otro sitio,
+compartidos entre clientes).
+
+Inicia el servidor:
+
+```bash
+python -m src.MCP_server
+```
+
+> **Nota:** Visitar `http://127.0.0.1:8000/mcp` en un navegador devolverá un
+> error `406 Not Acceptable`. Es lo esperado — el endpoint requiere cabeceras
+> MCP (`Accept: application/json, text/event-stream`) que los navegadores no
+> envían. El 406 indica que el servidor está funcionando correctamente.
+
+#### Opcional: conectarlo a Claude Code
+
+Actualiza `.mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "agenda": {
+      "type": "http",
+      "url": "http://127.0.0.1:8000/mcp"
+    }
+  }
+}
+```
+
+Asegúrate de que el servidor esté en ejecución antes de que Claude Code se conecte.
