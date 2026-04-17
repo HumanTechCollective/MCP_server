@@ -213,5 +213,5 @@ data/database.db
 CLAUDE.md
 learning.md
 ROADMAP.md
-data/content_sources.md
+data/private
 scripts/import_talks.py
