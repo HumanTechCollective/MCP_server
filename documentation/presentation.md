@@ -115,6 +115,40 @@
 - In a later step we'll modify the client we already built (the one that
   calls tools directly) to instead receive its tools from the MCP server.
 
+### Transports: stdio vs HTTP
+
+- **stdio** — the client launches the server as a local subprocess and they
+  communicate over stdin/stdout. Simple, local only.
+- **HTTP (streamable-http)** — the server runs as an independent process;
+  clients connect over a URL. Enables remote MCP servers, shared across
+  clients.
+- The same server code supports both transports — only the startup argument
+  changes.
+- Diagram idea: on the left, one client with an arrow to a local subprocess
+  (stdio). On the right, several clients connecting over HTTP to a single
+  remote server.
+
+### Tool discovery at runtime
+
+- Without MCP: the client imports tools as code. Changing a tool means
+  updating the client.
+- With MCP: the client asks the server "what tools do you have?" when it
+  connects, and receives the schemas back.
+- The client doesn't know the domain — it only speaks MCP.
+- Consequence: tools can be added or changed on the server without touching
+  the client.
+- Diagram idea: sequence diagram — client → server (`list_tools`), server →
+  client (schemas), client → LLM (schemas).
+
+### The MCP SDK: FastMCP
+
+- `FastMCP` is the high-level class from the official MCP Python SDK for
+  building MCP servers.
+- It generates each tool's schema automatically from the function signature
+  and docstring — no need to write it by hand.
+- The SDK is also available in TypeScript, Kotlin, Swift, and other
+  languages.
+
 ## References
 
 ### Documentation and resources
@@ -126,5 +160,6 @@
 - [Anthropic tool use course (GitHub)](https://github.com/anthropics/courses/tree/master/tool_use)
 - [Claude platform tool use docs](https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview)
 - [MCP Python SDK (GitHub)](https://github.com/modelcontextprotocol/python-sdk)
+- [FastMCP quickstart example (MCP Python SDK README)](https://github.com/modelcontextprotocol/python-sdk#quickstart)
 - [MCP official docs](https://modelcontextprotocol.io/docs/sdk)
 - [DeepLearning.ai course: Build Rich-Context AI Apps with Anthropic](https://learn.deeplearning.ai/courses/mcp-build-rich-context-ai-apps-with-anthropic/lesson/dbabg/creating-an-mcp-server)
