@@ -271,3 +271,41 @@ Update `.mcp.json`:
 ```
 
 Make sure the server is running before Claude Code connects.
+
+
+## 4. The client (v2): MCP client
+
+In section 2 we built a client that imported `tools_schema` and `tool_mapping` from `src/tools.py`.
+
+Now that the tools are in an MCP server, we can write a client that **discovers
+the tools at runtime**. It asks the server "what tools do you have?", gets back
+the schemas, and hands them to the LLM. The client no longer needs to know
+anything about the agenda — it only knows how to speak MCP.
+
+Open [src/mcp_client.py](../src/mcp_client.py). Compared to the v1 client, there are four key differences:
+
+- **Connecting to the server.** `streamable_http_client` + `ClientSession` open
+  a connection to the MCP server running on `http://127.0.0.1:8000/mcp`.
+- **Discovering tools.** `session.list_tools()` asks the server for its tools
+  instead of importing them from a Python module.
+- **Adapting the schema.** `mcp_tool_to_schema()` converts each MCP tool
+  definition into the dict format that `bind_tools` expects.
+- **Calling tools.** `session.call_tool(name, args)` runs the tool on the
+  server over MCP — the client never imports or executes the Python function
+  itself.
+
+### Run it
+
+You need **two terminals**: one for the server, one for the client.
+
+In the first terminal, start the MCP server with HTTP (from section 3.2):
+
+```bash
+python -m src.MCP_server
+```
+
+In the second terminal, start the client:
+
+```bash
+python -m src.mcp_client
+```
