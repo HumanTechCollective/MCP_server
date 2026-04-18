@@ -1,0 +1,21 @@
+services:
+  mcp:
+    build: .
+    command: python -m src.MCP_server
+    environment:
+      MCP_HOST: "0.0.0.0"
+      MCP_PORT: "8000"
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+
+  telegram-bot:
+    build: .
+    command: python -m src.telegram_bot
+    env_file:
+      - .env
+    environment:
+      MCP_SERVER_URL: "http://mcp:8000/mcp"
+    depends_on:
+      - mcp

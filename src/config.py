@@ -6,12 +6,12 @@ from dotenv import load_dotenv
 load_dotenv()
 
 database_file = "data/sample_database.db"
-mcp_host = "127.0.0.1"
-mcp_port = 8000
-mcp_server_url = f"http://{mcp_host}:{mcp_port}/mcp"
+mcp_host = os.getenv("MCP_HOST", "127.0.0.1")
+mcp_port = int(os.getenv("MCP_PORT", "8000"))
+mcp_server_url = os.getenv("MCP_SERVER_URL", f"http://{mcp_host}:{mcp_port}/mcp")
 ollama_url = os.getenv("OLLAMA_URL", "https://ollama.com")
 ollama_api_key = os.getenv("OLLAMA_API_KEY", "")
-ollama_model = "gemma4:31b-cloud"
+ollama_model = os.getenv("LLM_MODEL","gemma4:31b-cloud")
 
 system_prompt = (
     "You are a helpful assistant bot for Codemotion Madrid 2026, "
