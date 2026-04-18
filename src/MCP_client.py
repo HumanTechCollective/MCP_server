@@ -8,9 +8,7 @@ from langchain_core.messages import HumanMessage, SystemMessage, ToolMessage
 from mcp import ClientSession
 from mcp.client.streamable_http import streamable_http_client
 
-from src.config import ollama_url, ollama_api_key, ollama_model, system_prompt, mcp_host, mcp_port
-
-mcp_server_url = f"http://{mcp_host}:{mcp_port}/mcp"
+from src.config import ollama_url, ollama_api_key, ollama_model, system_prompt, mcp_server_url
 
 
 def create_llm() -> ChatOllama:
@@ -63,6 +61,13 @@ async def process_query(session, llm_with_tools, query) -> str:
             ))
 
 
+async def setup_llm_with_tools(session):
+    """Discover tools from the MCP server and bind them to a fresh LLM."""
+    tools_result = await session.list_tools()
+    tool_schemas = [mcp_tool_to_schema(t) for t in tools_result.tools]
+    return create_llm().bind_tools(tool_schemas)
+
+
 async def main():
     # Connect to the already-running MCP server over streamable HTTP
     async with (
@@ -70,11 +75,7 @@ async def main():
         ClientSession(read, write) as session,
     ):
         await session.initialize()
-
-        # Discover tools from the server and bind them to the LLM
-        tools_result = await session.list_tools()
-        tool_schemas = [mcp_tool_to_schema(t) for t in tools_result.tools]
-        llm_with_tools = create_llm().bind_tools(tool_schemas)
+        llm_with_tools = await setup_llm_with_tools(session)
 
         print("Type your queries or 'quit' to exit.\n")
         while True:

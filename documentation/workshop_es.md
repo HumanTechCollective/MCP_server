@@ -290,13 +290,19 @@ Abre [src/mcp_client.py](../src/mcp_client.py). Comparado con el cliente v1, hay
 
 - **Conectarse al servidor.** `streamable_http_client` + `ClientSession` abren
   una conexión con el servidor MCP que se ejecuta en `http://127.0.0.1:8000/mcp`.
-- **Descubrir herramientas.** `session.list_tools()` le pide al servidor sus
+- **Descubrir las herramientas.** `session.list_tools()` le pide al servidor sus
   herramientas en lugar de importarlas desde un módulo de Python.
 - **Adaptar el esquema.** `mcp_tool_to_schema()` convierte cada definición de
   herramienta MCP al formato de diccionario que `bind_tools` espera.
-- **Llamar a las herramientas.** `session.call_tool(name, args)` ejecuta la
+- **Usar a las herramientas.** `session.call_tool(name, args)` ejecuta la
   herramienta en el servidor por MCP — el cliente nunca importa ni ejecuta la
   función Python.
+
+El descubrimiento de las herramientas, la adaptación del esquema y la llamada a
+`bind_tools` están agrupados en la funcion auxiliar `setup_llm_with_tools(session)`, 
+que devuelve un LLM listo para usar. Mantenerlo como una función aparte permite que 
+otros puntos de entrada (un bot de Telegram, una aplicación web, …) reutilicen la misma 
+configuración sin duplicar código.
 
 ### Ejecútalo
 

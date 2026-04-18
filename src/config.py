@@ -8,6 +8,7 @@ load_dotenv()
 database_file = "data/sample_database.db"
 mcp_host = "127.0.0.1"
 mcp_port = 8000
+mcp_server_url = f"http://{mcp_host}:{mcp_port}/mcp"
 ollama_url = os.getenv("OLLAMA_URL", "https://ollama.com")
 ollama_api_key = os.getenv("OLLAMA_API_KEY", "")
 ollama_model = "gemma4:31b-cloud"

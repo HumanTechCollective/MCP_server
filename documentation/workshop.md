@@ -294,6 +294,11 @@ Open [src/mcp_client.py](../src/mcp_client.py). Compared to the v1 client, there
   server over MCP — the client never imports or executes the Python function
   itself.
 
+The tool discovery, schema adaptation, and `bind_tools` call are grouped in a
+small helper, `setup_llm_with_tools(session)`, which returns an LLM ready to
+use. Keeping it as its own function means other entry points (a Telegram bot,
+a web app, …) can reuse the same setup without duplicating code.
+
 ### Run it
 
 You need **two terminals**: one for the server, one for the client.
