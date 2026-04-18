@@ -30,7 +30,10 @@ async def question(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         # Pull the shared MCP session and bound LLM that main() stashed at startup
         session = context.bot_data["session"]
         llm_with_tools = context.bot_data["llm_with_tools"]
-        answer = await process_query(session, llm_with_tools, query)
+        # Per-user conversation, created on first message from that user
+        conversations = context.bot_data["conversations"]
+        conversation = conversations.setdefault(update.effective_user.id, [])
+        answer = await process_query(session, llm_with_tools, query, conversation)
         logger.debug("Answer: %s", answer)
         await context.bot.send_message(chat_id=update.effective_chat.id, text=answer)
     except Exception:
@@ -54,6 +57,8 @@ async def main():
         # Stash shared state so handlers can reach it via context.bot_data
         application.bot_data["session"] = session
         application.bot_data["llm_with_tools"] = llm_with_tools
+        # Per-user conversations: {telegram_user_id: [message, ...]}
+        application.bot_data["conversations"] = {}
 
         # Handler for new conversations (user sends /start)
         application.add_handler(CommandHandler("start", start))

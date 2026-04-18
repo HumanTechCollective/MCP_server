@@ -18,7 +18,19 @@ system_prompt = (
     "which takes place on the 20th and 21st of April 2026. "
     "Day 1 is 2026-04-20 and day 2 is 2026-04-21. "
     "When calling tools that take a `day` argument, always pass "
-    "the date in ISO format (YYYY-MM-DD), e.g. '2026-04-20'."
+    "the date in ISO format (YYYY-MM-DD), e.g. '2026-04-20'. "
+    "Only call tools that appear in your tool list. "
+    "When the user asks for a list, include every matching item from "
+    "the tool result. Do not filter or shorten the list. "
+    "When a follow-up question refers to something already mentioned "
+    "in the conversation (e.g. 'tell me more about the X one'), "
+    "resolve the reference using the previous messages. If the referent is "
+    "not in prior messages, call a tool to look it up instead of saying you "
+    "don't know. "
+    "Only use information returned by tool calls or stated earlier in this "
+    "conversation. Never invent details such as room, location, description, "
+    "requirements, prerequisites, or any other field. If a field is not "
+    "present in the tool result, omit it or say you don't have that information."
 )
 
 telegram_token = os.getenv("TELEGRAM_TOKEN", "")

@@ -3,7 +3,7 @@
 import asyncio
 
 from langchain_ollama import ChatOllama
-from langchain_core.messages import HumanMessage, SystemMessage, ToolMessage
+from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, ToolMessage
 
 from mcp import ClientSession
 from mcp.client.streamable_http import streamable_http_client
@@ -38,9 +38,14 @@ def tool_result_to_string(result) -> str:
     return "\n".join(parts)
 
 
-async def process_query(session, llm_with_tools, query) -> str:
-    """Send a query to the LLM, let it call MCP tools if needed, return the final answer."""
-    messages = [SystemMessage(content=system_prompt), HumanMessage(content=query)]
+async def process_query(session, llm_with_tools, query, conversation=None) -> str:
+    """Send a query to the LLM, let it call MCP tools if needed, return the final answer.
+
+    If `conversation` is a list, prior user/assistant turns from it are prepended to
+    the LLM input, and the new (user question, final answer) pair is appended in place.
+    """
+    prior = conversation if conversation is not None else []
+    messages = [SystemMessage(content=system_prompt), *prior, HumanMessage(content=query)]
 
     # Loop: send message, execute tool calls over MCP, repeat until we get a text answer
     while True:
@@ -49,6 +54,10 @@ async def process_query(session, llm_with_tools, query) -> str:
 
         # If the LLM didn't request any tool calls, we're done
         if not response.tool_calls:
+            if conversation is not None:
+                # Store only the clean user/assistant pair — no tool-call scaffolding
+                conversation.append(HumanMessage(content=query))
+                conversation.append(AIMessage(content=response.content))
             return response.content
 
         # Execute each tool call via MCP and send the results back
@@ -77,12 +86,14 @@ async def main():
         await session.initialize()
         llm_with_tools = await setup_llm_with_tools(session)
 
+        # Single conversation for this CLI session — grows in place on each query
+        conversation = []
         print("Type your queries or 'quit' to exit.\n")
         while True:
             query = input("Query: ").strip()
             if query.lower() == "quit":
                 break
-            answer = await process_query(session, llm_with_tools, query)
+            answer = await process_query(session, llm_with_tools, query, conversation)
             print(f"\n{answer}\n")
 
 
