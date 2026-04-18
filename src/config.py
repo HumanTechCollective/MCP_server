@@ -20,3 +20,7 @@ system_prompt = (
     "When calling tools that take a `day` argument, always pass "
     "the date in ISO format (YYYY-MM-DD), e.g. '2026-04-20'."
 )
+
+telegram_token = os.getenv("TELEGRAM_TOKEN", "")
+bot_greeting = "This is the bot for Codemotion Madrid 2026. You can ask me questions about the agenda."
+telegram_error_message = "I'm having trouble connecting. Please try again."

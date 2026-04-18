@@ -24,7 +24,8 @@ This project is also a reusable template for building MCP servers.
 │   ├── tools_client.py         # LLM client with tool calling
 │   ├── config.py              # Configuration (Ollama URL, model, etc.)
 │   ├── tools.py               # Tool functions, schemas, and execution
-│   └── MCP_server.py          # MCP server exposing the agenda tools
+│   ├── MCP_server.py          # MCP server exposing the agenda tools
+│   └── telegram_bot.py        # Telegram bot frontend
 ├── tests/
 │   ├── test_tools_client.py    # Client tests
 │   └── test_tools.py          # Tool function tests
@@ -38,7 +39,7 @@ This project is also a reusable template for building MCP servers.
 python3 -m venv .venv
 source .venv/bin/activate
 pip install --upgrade pip
-pip install pytest python-dotenv langchain_core langchain_ollama "mcp[cli]"
+pip install pytest python-dotenv langchain_core langchain_ollama "mcp[cli]" python-telegram-bot
 ```
 
 ### LLM setup
@@ -105,3 +106,21 @@ python -m src.MCP_server
 source .venv/bin/activate
 python -m src.tools_client
 ```
+
+## Run the Telegram bot
+
+Create a bot with [@BotFather](https://t.me/BotFather) on Telegram and copy the token
+it gives you into your `.env`:
+
+```
+TELEGRAM_TOKEN=<your bot token>
+```
+
+Run the bot from the project root:
+
+```bash
+source .venv/bin/activate
+python -m src.telegram_bot
+```
+
+Then open your bot in Telegram and send `/start`.
