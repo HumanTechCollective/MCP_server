@@ -116,11 +116,14 @@ it gives you into your `.env`:
 TELEGRAM_TOKEN=<your bot token>
 ```
 
-Run the bot from the project root:
+Run the bot (and the MCP server) from the project root:
 
 ```bash
 source .venv/bin/activate
-python -m src.telegram_bot
+python -m src.MCP_server & python -m src.telegram_bot
 ```
+
+This starts the MCP server in the background and then runs the Telegram bot in
+the foreground.
 
 Then open your bot in Telegram and send `/start`.
