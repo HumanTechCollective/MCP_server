@@ -12,13 +12,23 @@ from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes, Messa
 from mcp import ClientSession
 from mcp.client.streamable_http import streamable_http_client
 
-from src.config import mcp_server_url, telegram_token, bot_greeting, telegram_error_message
+from src.config import mcp_server_url, telegram_token, bot_greeting, telegram_error_message, max_interactions
 from src.MCP_client import setup_llm_with_tools, process_query
 
 logger = logging.getLogger(__name__)
 
 # Telegram rejects text messages longer than 4096 characters (Bot API limit).
 TELEGRAM_MESSAGE_LIMIT = 4096
+
+
+def trim_conversation(conversation, max_interactions) -> None:
+    # One interaction = one human message + one assistant message, so the buffer
+    # cap is twice the number of interactions we want to keep.
+    max_messages = max_interactions * 2
+    if max_messages == 0:
+        conversation.clear()
+        return
+    del conversation[:-max_messages]
 
 
 def split_for_telegram(text, limit=TELEGRAM_MESSAGE_LIMIT) -> list[str]:
@@ -63,6 +73,8 @@ async def question(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         conversations = context.bot_data["conversations"]
         conversation = conversations.setdefault(update.effective_user.id, [])
         answer = await process_query(session, llm_with_tools, query, conversation)
+        # Cap the per-user buffer so conversations don't grow unbounded over time
+        trim_conversation(conversation, max_interactions)
         logger.debug("Answer: %s", answer)
         # Split the answer if it is over Telegram's length limit
         for chunk in split_for_telegram(answer):

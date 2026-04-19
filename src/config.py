@@ -6,12 +6,13 @@ from dotenv import load_dotenv
 load_dotenv()
 
 database_file = "data/sample_database.db"
-mcp_host = "127.0.0.1"
-mcp_port = 8000
-mcp_server_url = f"http://{mcp_host}:{mcp_port}/mcp"
+mcp_host = "0.0.0.0"
+mcp_port = 8505
+#mcp_server_url = f"http://{mcp_host}:{mcp_port}/mcp"
+mcp_server_url = "https://mcp.humantechcollective.org/mcp"
 ollama_url = os.getenv("OLLAMA_URL", "https://ollama.com")
 ollama_api_key = os.getenv("OLLAMA_API_KEY", "")
-ollama_model = "gemma4:31b-cloud"
+ollama_model = "gemma4:26b"
 
 system_prompt = (
     "You are a helpful assistant bot for Codemotion Madrid 2026, "
@@ -36,3 +37,5 @@ system_prompt = (
 telegram_token = os.getenv("TELEGRAM_TOKEN", "")
 bot_greeting = "This is the bot for Codemotion Madrid 2026. You can ask me questions about the agenda."
 telegram_error_message = "I'm having trouble connecting. Please try again."
+# Max human/assistant pairs kept per user conversation to stop it growing unbounded
+max_interactions = 3
