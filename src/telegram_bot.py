@@ -17,6 +17,35 @@ from src.MCP_client import setup_llm_with_tools, process_query
 
 logger = logging.getLogger(__name__)
 
+# Telegram rejects text messages longer than 4096 characters (Bot API limit).
+TELEGRAM_MESSAGE_LIMIT = 4096
+
+
+def split_for_telegram(text, limit=TELEGRAM_MESSAGE_LIMIT) -> list[str]:
+    # Fast path: short enough to send as a single message, no splitting needed.
+    if len(text) <= limit:
+        return [text]
+    # Pack lines into chunks up to `limit` chars, breaking at newlines so the
+    # split reads naturally. A single line longer than `limit` is hard-cut.
+    chunks = []
+    current = ""
+    for line in text.split("\n"):
+        while len(line) > limit:
+            if current:
+                chunks.append(current)
+                current = ""
+            chunks.append(line[:limit])
+            line = line[limit:]
+        extra = len(line) + (1 if current else 0)
+        if len(current) + extra > limit:
+            chunks.append(current)
+            current = line
+        else:
+            current = (current + "\n" + line) if current else line
+    if current:
+        chunks.append(current)
+    return chunks
+
 
 # Start handler. Called when a user sends the /start command.
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -35,7 +64,9 @@ async def question(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         conversation = conversations.setdefault(update.effective_user.id, [])
         answer = await process_query(session, llm_with_tools, query, conversation)
         logger.debug("Answer: %s", answer)
-        await context.bot.send_message(chat_id=update.effective_chat.id, text=answer)
+        # Split the answer if it is over Telegram's length limit
+        for chunk in split_for_telegram(answer):
+            await context.bot.send_message(chat_id=update.effective_chat.id, text=chunk)
     except Exception:
         logger.exception("Failed to handle message")
         await context.bot.send_message(
