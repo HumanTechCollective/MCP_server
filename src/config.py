@@ -6,13 +6,16 @@ from dotenv import load_dotenv
 load_dotenv()
 
 database_file = "data/sample_database.db"
-mcp_host = "0.0.0.0"
-mcp_port = 8505
-#mcp_server_url = f"http://{mcp_host}:{mcp_port}/mcp"
-mcp_server_url = "https://mcp.humantechcollective.org/mcp"
+
+# MCP Server
+mcp_host = os.getenv("MCP_HOST", "127.0.0.1")
+mcp_port = int(os.getenv("MCP_PORT", "8000"))
+mcp_server_url = os.getenv("MCP_SERVER_URL", f"http://{mcp_host}:{mcp_port}/mcp")
+
+# Ollama
 ollama_url = os.getenv("OLLAMA_URL", "https://ollama.com")
 ollama_api_key = os.getenv("OLLAMA_API_KEY", "")
-ollama_model = "gemma4:26b"
+ollama_model = os.getenv("LLM_MODEL","gemma4:31b-cloud")
 
 system_prompt = (
     "You are a helpful assistant bot for Codemotion Madrid 2026, "
@@ -34,6 +37,7 @@ system_prompt = (
     "present in the tool result, omit it or say you don't have that information."
 )
 
+# Telegram bot
 telegram_token = os.getenv("TELEGRAM_TOKEN", "")
 bot_greeting = "This is the bot for Codemotion Madrid 2026. You can ask me questions about the agenda."
 telegram_error_message = "I'm having trouble connecting. Please try again."
