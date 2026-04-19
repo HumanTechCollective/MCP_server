@@ -2,11 +2,27 @@ import os
 import json
 import sqlite3
 from mcp.server.fastmcp import FastMCP
-from src.config import database_file, mcp_host, mcp_port
+from src.config import database_file, brief_file, about_bot_file, mcp_host, mcp_port
 
 
 # Initialize FastMCP server
 mcp = FastMCP("agenda", host=mcp_host, port=mcp_port)
+
+# --- Resources ---
+"""Static content the client can read by URI."""
+
+@mcp.resource("agenda://codemotion", mime_type="text/markdown")
+def codemotion_brief() -> str:
+    """Brief about Codemotion Madrid 2026: dates, venue, audience, tracks, and format."""
+    with open(brief_file) as f:
+        return f.read()
+
+@mcp.resource("agenda://about-this-bot", mime_type="text/markdown")
+def about_this_bot() -> str:
+    """Answers user questions about how this bot works, what it is, and where its code lives."""
+    with open(about_bot_file) as f:
+        return f.read()
+
 
 # --- Tool functions ---
 """Tool functions that query the agenda database."""

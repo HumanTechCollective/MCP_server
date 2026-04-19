@@ -6,6 +6,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 database_file = "data/database.db"
+brief_file = "data/codemotion_brief.md"
+about_bot_file = "documentation/about_this_bot.md"
 
 # MCP Server
 mcp_host = os.getenv("MCP_HOST", "127.0.0.1")

@@ -38,7 +38,20 @@ def tool_result_to_string(result) -> str:
     return "\n".join(parts)
 
 
-async def process_query(session, llm_with_tools, query, conversation=None) -> str:
+async def fetch_all_resources(session) -> str:
+    """Read every resource from the MCP server, formatted for the system prompt."""
+    result = await session.list_resources()
+    if not result.resources:
+        return ""
+    sections = ["## Reference resources"]
+    for resource in result.resources:
+        content = await session.read_resource(resource.uri)
+        texts = [c.text for c in content.contents if hasattr(c, "text")]
+        sections.append(f"### {resource.name}\n" + "\n".join(texts))
+    return "\n\n".join(sections)
+
+
+async def process_query(session, llm_with_tools, query, system_prompt, conversation=None) -> str:
     """Send a query to the LLM, let it call MCP tools if needed, return the final answer.
 
     If `conversation` is a list, prior user/assistant turns from it are prepended to
@@ -85,6 +98,10 @@ async def main():
     ):
         await session.initialize()
         llm_with_tools = await setup_llm_with_tools(session)
+        # Pull resources once at startup and append them to the system prompt,
+        # so every turn sees the same reference context without re-reading.
+        resources_text = await fetch_all_resources(session)
+        augmented_prompt = system_prompt + (f"\n\n{resources_text}" if resources_text else "")
 
         # Single conversation for this CLI session — grows in place on each query
         conversation = []
@@ -93,7 +110,7 @@ async def main():
             query = input("Query: ").strip()
             if query.lower() == "quit":
                 break
-            answer = await process_query(session, llm_with_tools, query, conversation)
+            answer = await process_query(session, llm_with_tools, query, augmented_prompt, conversation)
             print(f"\n{answer}\n")
 
 
