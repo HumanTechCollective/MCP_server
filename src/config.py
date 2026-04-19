@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 # Load .env into OS environment
 load_dotenv()
 
-database_file = "data/sample_database.db"
+database_file = "data/database.db"
 
 # MCP Server
 mcp_host = os.getenv("MCP_HOST", "127.0.0.1")

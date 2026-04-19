@@ -206,9 +206,6 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 
-# Generated database
-data/database.db
-
 # Project-internal files (not shared in the repo)
 CLAUDE.md
 learning.md
