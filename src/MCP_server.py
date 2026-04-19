@@ -18,7 +18,7 @@ def get_talks_by_day(day) -> list[dict]:
     cursor = connection.cursor()
 
     cursor.execute(
-        "SELECT title, start_time, speakers, topic, stage, languages "
+        "SELECT title, start_time, speakers, topic, stage, languages, type "
         "FROM talks WHERE day = ? ORDER BY start_time",
         (day,)
     )
@@ -33,6 +33,7 @@ def get_talks_by_day(day) -> list[dict]:
             "topic": row[3],
             "stage": row[4],
             "languages": row[5],
+            "type": row[6],
         }
         for row in rows
     ]
@@ -45,7 +46,7 @@ def get_all_talks() -> list[dict]:
     cursor = connection.cursor()
 
     cursor.execute(
-        "SELECT title, day, start_time, speakers, topic FROM talks ORDER BY day, start_time"
+        "SELECT title, day, start_time, speakers, topic, type FROM talks ORDER BY day, start_time"
     )
     rows = cursor.fetchall()
     connection.close()
@@ -57,6 +58,7 @@ def get_all_talks() -> list[dict]:
             "start_time": row[2],
             "speakers": row[3],
             "topic": row[4],
+            "type": row[5],
         }
         for row in rows
     ]
@@ -64,12 +66,12 @@ def get_all_talks() -> list[dict]:
 
 @mcp.tool()
 def get_talk_details(title) -> dict:
-    """Return full details for a talk matching the given title: day, start time, end time, description, speakers, stage, and languages."""
+    """Return full details for a talk matching the given title: day, start time, end time, description, speakers, stage, languages, and type."""
     connection = sqlite3.connect(database_file)
     cursor = connection.cursor()
 
     cursor.execute(
-        "SELECT day, start_time, end_time, description, speakers, stage, languages "
+        "SELECT day, start_time, end_time, description, speakers, stage, languages, type "
         "FROM talks WHERE title LIKE ?",
         (f"%{title}%",),
     )
@@ -87,6 +89,7 @@ def get_talk_details(title) -> dict:
         "speakers": row[4],
         "stage": row[5],
         "languages": row[6],
+        "type": row[7],
     }
 
 
