@@ -3,7 +3,7 @@
 También disponible en: [English](workshop.md)
 
 > Taller práctico donde construiremos paso a paso un chatbot que responde preguntas
-> sobre una agenda de charlas. Empezaremos conectando herramientas (tools) a un LLM
+> sobre la agenda de un evento. Empezaremos conectando herramientas (tools) a un LLM
 > y terminaremos encapsulándolas en un servidor Model Context Protocol (MCP)
 > reutilizable.
 
@@ -81,7 +81,7 @@ Las herramientas son funciones que pones a disposición de un LLM. El LLM no pue
 ejecutarlas — solo puede pedirle a tu cliente que las ejecute.
 
 El flujo de uso de herramientas funciona así: describes cada herramienta (nombre, qué
-hace, qué entradas necesita). Cuando el LLM decide que necesita una, envía una
+hace, qué valores de entrada necesita). Cuando el LLM decide que necesita una, envía una
 solicitud. Tu código ejecuta la función y devuelve el resultado. El LLM entonces usa
 ese resultado para responder al usuario.
 
@@ -160,7 +160,7 @@ Model Context Protocol (MCP), las encapsulamos en un servidor MCP.
 Abre [src/MCP_server.py](../src/MCP_server.py). Es una copia de
 [src/tools.py](../src/tools.py) con unos pocos cambios:
 
-**1. Crear el servidor**
+### 1. Crear el servidor
 
 ```python
 from mcp.server.fastmcp import FastMCP
@@ -171,7 +171,7 @@ mcp = FastMCP("agenda")
 `FastMCP` es la clase principal del servidor del SDK de MCP. El nombre
 (`"agenda"`) identifica este servidor a los clientes.
 
-**2. Registrar cada herramienta usando un decorador**
+### 2. Registrar cada herramienta usando un decorador
 
 ```python
 @mcp.tool()
@@ -185,12 +185,17 @@ FastMCP genera el esquema de la herramienta automáticamente — por lo que la
 lista manual `tools_schema` y el diccionario `tool_mapping` de `src/tools.py`
 ya no son necesarios.
 
-**3. Ejecutar el servidor**
+> Un decorador es una etiqueta que pones sobre una función (la línea `@algo` justo
+> encima de ella) que añade comportamiento extra sin cambiar el código propio de la
+> función.
+> Aquí, `@mcp.tool()` le dice a MCP: *"toma esta función y regístrala como una herramienta."*
+> La función sigue haciendo exactamente lo que hacía antes; el servidor simplemente ahora la conoce.
 
-MCP admite dos transportes principales: **stdio** (más simple, solo local) y
-**HTTP** (para servidores remotos). Mostraremos ambos.
+### 3. Ejecutar el servidor
 
-### 3.1 Transporte stdio
+MCP admite dos metodos de transporte: **stdio** (más simple, solo local) y **HTTP** (para servidores remotos). Mostraremos ambos.
+
+#### 3.1 Transporte stdio
 
 ```python
 if __name__ == "__main__":
@@ -230,7 +235,7 @@ Ajusta las rutas para que coincidan con el lugar donde clonaste el repositorio.
 Reinicia Claude Code y pregúntale sobre la agenda — lanzará el servidor y
 llamará a las herramientas MCP para responder.
 
-### 3.2 Transporte HTTP
+#### 3.2 Transporte HTTP
 
 Cambia el transporte:
 
@@ -286,7 +291,7 @@ Ahora que las herramientas (tools) estan en el servidor MCP, podemos escribir un
 cliente ya no necesita saber nada sobre la agenda — solo necesita saber hablar
 MCP.
 
-Abre [src/mcp_client.py](../src/mcp_client.py). Comparado con el cliente v1, hay cuatro diferencias clave:
+Abre [src/MCP_client.py](../src/MCP_client.py). Comparado con el cliente v1, hay cuatro diferencias clave:
 
 - **Conectarse al servidor.** `streamable_http_client` + `ClientSession` abren
   una conexión con el servidor MCP que se ejecuta en `http://127.0.0.1:8000/mcp`.
@@ -304,6 +309,16 @@ que devuelve un LLM listo para usar. Mantenerlo como una función aparte permite
 otros puntos de entrada (un bot de Telegram, una aplicación web, …) reutilicen la misma 
 configuración sin duplicar código.
 
+### Memoria de la conversación
+
+`process_query(session, llm_with_tools, query, conversation=None)` acepta una
+lista `conversation` opcional. Cuando se proporciona, los turnos previos de
+usuario/asistente se añaden al principio de la entrada del LLM, y el nuevo par
+`(pregunta del usuario, respuesta final)` se añade al final de la lista.
+
+`main()` mantiene una única lista `conversation = []` que crece a lo largo de
+las consultas.
+
 ### Ejecútalo
 
 Necesitas **dos terminales**: uno para el servidor y otro para el cliente.
@@ -317,5 +332,5 @@ python -m src.MCP_server
 En el segundo terminal, inicia el cliente:
 
 ```bash
-python -m src.mcp_client
+python -m src.MCP_client
 ```

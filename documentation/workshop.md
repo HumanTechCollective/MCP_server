@@ -3,7 +3,7 @@
 Also available in: [Español](workshop_es.md)
 
 > Hands-on workshop where we'll build step by step a chatbot that answers questions
-> about a talks agenda. We'll start by connecting tools to an LLM and finish by
+> about an event agenda. We'll start by connecting tools to an LLM and finish by
 > wrapping them in a reusable Model Context Protocol (MCP) server.
 
 ## What we'll build
@@ -158,7 +158,7 @@ To share our tools with any Model Context Protocol (MCP) compatible app, we wrap
 Open [src/MCP_server.py](../src/MCP_server.py). It is mostly a copy of
 [src/tools.py](../src/tools.py) with a few small changes:
 
-**1. Create the server**
+### 1. Create the server
 
 ```python
 from mcp.server.fastmcp import FastMCP
@@ -169,7 +169,7 @@ mcp = FastMCP("agenda")
 `FastMCP` is the high-level server class from the MCP SDK. The name (`"agenda"`)
 identifies this server to clients.
 
-**2. Register each tool with a decorator**
+### 2. Register each tool with a decorator
 
 ```python
 @mcp.tool()
@@ -178,16 +178,21 @@ def get_all_talks() -> list[dict]:
     ...
 ```
 
-The `@mcp.tool()` decorator registers the function as an MCP tool. 
-FastMCP generates the tool schema automatically — so the manual `tools_schema` 
+The `@mcp.tool()` decorator registers the function as an MCP tool.
+FastMCP generates the tool schema automatically — so the manual `tools_schema`
 list and `tool_mapping` dictionary from `src/tools.py` are no longer needed.
 
-**3. Run the server**
+> A decorator is a label you put on a function (the `@something` line right above it)
+> that adds extra behavior without changing the function's own code.
+> Here, `@mcp.tool()` tells MCP: *"take this function and register it as a tool."*
+> The function still does exactly what it did before; the server just knows about it now.
+
+### 3. Run the server
 
 MCP supports two main transports: **stdio** (simpler, local only) and **HTTP**
 (for remote servers). We'll show both.
 
-### 3.1 stdio transport
+#### 3.1 stdio transport
 
 ```python
 if __name__ == "__main__":
@@ -227,7 +232,7 @@ Adjust the paths to match where you cloned the repo. Restart Claude Code and ask
 it about the agenda — it will launch the server and call the MCP tools to
 answer.
 
-### 3.2 HTTP transport
+#### 3.2 HTTP transport
 
 Change the transport:
 
@@ -282,7 +287,7 @@ the tools at runtime**. It asks the server "what tools do you have?", gets back
 the schemas, and hands them to the LLM. The client no longer needs to know
 anything about the agenda — it only knows how to speak MCP.
 
-Open [src/mcp_client.py](../src/mcp_client.py). Compared to the v1 client, there are four key differences:
+Open [src/MCP_client.py](../src/MCP_client.py). Compared to the v1 client, there are four key differences:
 
 - **Connecting to the server.** `streamable_http_client` + `ClientSession` open
   a connection to the MCP server running on `http://127.0.0.1:8000/mcp`.
@@ -299,6 +304,15 @@ small helper, `setup_llm_with_tools(session)`, which returns an LLM ready to
 use. Keeping it as its own function means other entry points (a Telegram bot,
 a web app, …) can reuse the same setup without duplicating code.
 
+### Conversation memory
+
+`process_query(session, llm_with_tools, query, conversation=None)` takes an
+optional `conversation` list. When provided, prior user/assistant turns from
+it are prepended to the LLM input, and the new `(user question, final answer)`
+pair is appended in place.
+
+`main()` keeps a single `conversation = []` that grows across queries.
+
 ### Run it
 
 You need **two terminals**: one for the server, one for the client.
@@ -312,5 +326,5 @@ python -m src.MCP_server
 In the second terminal, start the client:
 
 ```bash
-python -m src.mcp_client
+python -m src.MCP_client
 ```
