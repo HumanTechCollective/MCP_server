@@ -97,7 +97,7 @@ def test_trim_conversation_modifies_in_place():
 # across repeated calls.
 
 
-async def fake_process_query(session, llm_with_tools, query, conversation):
+async def fake_process_query(session, llm_with_tools, query, system_prompt, conversation):
     # Stand-in for the real LLM+MCP call. Mirrors the only side effect that the
     # test cares about: appending the (user, assistant) pair to `conversation`.
     answer = f"answer to {query}"
@@ -127,6 +127,7 @@ def make_context(conversations):
         bot_data={
             "session": None,
             "llm_with_tools": None,
+            "augmented_prompt": "",
             "conversations": conversations,
         },
     )
