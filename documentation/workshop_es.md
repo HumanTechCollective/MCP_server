@@ -191,11 +191,35 @@ ya no son necesarios.
 > Aquí, `@mcp.tool()` le dice a MCP: *"toma esta función y regístrala como una herramienta."*
 > La función sigue haciendo exactamente lo que hacía antes; el servidor simplemente ahora la conoce.
 
-### 3. Ejecutar el servidor
+### 3. Registrar recursos usando un decorador
+
+Además de herramientas, un servidor MCP puede exponer **recursos**: contenido
+pasivo que el cliente puede leer, como un archivo.
+Las herramientas son acciones que el LLM decide invocar; los recursos son
+material de referencia que el cliente recupera por su cuenta.
+
+```python
+@mcp.resource("agenda://codemotion", mime_type="text/markdown")
+def codemotion_brief() -> str:
+    """Brief about Codemotion Madrid 2026: dates, venue, audience, tracks, and format."""
+    with open(brief_file) as f:
+        return f.read()
+```
+
+El primer argumento de `@mcp.resource(...)` es el URI del recurso — cualquier
+cadena con forma `esquema://ruta`. El docstring se convierte en la
+descripción que ven los clientes. El valor devuelto por la función es el
+contenido del recurso.
+
+[src/MCP_server.py](../src/MCP_server.py) registra dos recursos de esta
+forma: `agenda://codemotion` (el brief del evento) y `agenda://about-this-bot`
+(una descripción del propio bot).
+
+### 4. Ejecutar el servidor
 
 MCP admite dos metodos de transporte: **stdio** (más simple, solo local) y **HTTP** (para servidores remotos). Mostraremos ambos.
 
-#### 3.1 Transporte stdio
+#### 4.1 Transporte stdio
 
 ```python
 if __name__ == "__main__":
@@ -235,7 +259,7 @@ Ajusta las rutas para que coincidan con el lugar donde clonaste el repositorio.
 Reinicia Claude Code y pregúntale sobre la agenda — lanzará el servidor y
 llamará a las herramientas MCP para responder.
 
-#### 3.2 Transporte HTTP
+#### 4.2 Transporte HTTP
 
 Cambia el transporte:
 
@@ -291,7 +315,7 @@ Ahora que las herramientas (tools) estan en el servidor MCP, podemos escribir un
 cliente ya no necesita saber nada sobre la agenda — solo necesita saber hablar
 MCP.
 
-Abre [src/MCP_client.py](../src/MCP_client.py). Comparado con el cliente v1, hay cuatro diferencias clave:
+Abre [src/MCP_client.py](../src/MCP_client.py). Comparado con el cliente v1, hay cinco diferencias clave:
 
 - **Conectarse al servidor.** `streamable_http_client` + `ClientSession` abren
   una conexión con el servidor MCP que se ejecuta en `http://127.0.0.1:8000/mcp`.
@@ -302,6 +326,9 @@ Abre [src/MCP_client.py](../src/MCP_client.py). Comparado con el cliente v1, hay
 - **Usar a las herramientas.** `session.call_tool(name, args)` ejecuta la
   herramienta en el servidor por MCP — el cliente nunca importa ni ejecuta la
   función Python.
+- **Leer recursos.** `session.list_resources()` y
+  `session.read_resource(uri)` recuperan el contenido estático del servidor
+  al inicio.
 
 El descubrimiento de las herramientas, la adaptación del esquema y la llamada a
 `bind_tools` están agrupados en la funcion auxiliar `setup_llm_with_tools(session)`, 
@@ -309,12 +336,22 @@ que devuelve un LLM listo para usar. Mantenerlo como una función aparte permite
 otros puntos de entrada (un bot de Telegram, una aplicación web, …) reutilicen la misma 
 configuración sin duplicar código.
 
+### Recursos
+
+`fetch_all_resources(session)` lista cada recurso que el servidor expone, lee
+cada uno y añade los contenidos bajo la cabecera `## Reference resources`. 
+`main()` lo llama una vez al inicio y añade el resultado al `system_prompt`, de modo que cada turno ve el mismo contexto de referencia sin volver a leerlo.
+
+Los recursos funcionan bien para **contenido pequeño y estable** que el LLM
+siempre debería tener a mano, como el resumen del evento o una descripción del bot.
+
 ### Memoria de la conversación
 
-`process_query(session, llm_with_tools, query, conversation=None)` acepta una
-lista `conversation` opcional. Cuando se proporciona, los turnos previos de
-usuario/asistente se añaden al principio de la entrada del LLM, y el nuevo par
-`(pregunta del usuario, respuesta final)` se añade al final de la lista.
+`process_query(session, llm_with_tools, query, system_prompt, conversation=None)`
+acepta una lista `conversation` opcional. Cuando se proporciona, los turnos
+previos de usuario/asistente se añaden al principio de la entrada del LLM, y
+el nuevo par `(pregunta del usuario, respuesta final)` se añade al final de
+la lista.
 
 `main()` mantiene una única lista `conversation = []` que crece a lo largo de
 las consultas.
@@ -323,7 +360,7 @@ las consultas.
 
 Necesitas **dos terminales**: uno para el servidor y otro para el cliente.
 
-En el primer terminal, inicia el servidor MCP con HTTP (de la sección 3.2):
+En el primer terminal, inicia el servidor MCP con HTTP (de la sección 4.2):
 
 ```bash
 python -m src.MCP_server

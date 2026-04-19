@@ -187,12 +187,33 @@ list and `tool_mapping` dictionary from `src/tools.py` are no longer needed.
 > Here, `@mcp.tool()` tells MCP: *"take this function and register it as a tool."*
 > The function still does exactly what it did before; the server just knows about it now.
 
-### 3. Run the server
+### 3. Register resources with a decorator
+
+Besides tools, an MCP server can expose **resources**: passive content the
+client can read, like a file. Tools are actions the LLM decides to invoke; resources are reference material the client pulls in on its own.
+
+```python
+@mcp.resource("agenda://codemotion", mime_type="text/markdown")
+def codemotion_brief() -> str:
+    """Brief about Codemotion Madrid 2026: dates, venue, audience, tracks, and format."""
+    with open(brief_file) as f:
+        return f.read()
+```
+
+The first argument to `@mcp.resource(...)` is the resource's URI — any string
+in `scheme://path` form. The docstring becomes the description clients see.
+The function's return value is the resource's content.
+
+[src/MCP_server.py](../src/MCP_server.py) registers two resources this way:
+`agenda://codemotion` (the event brief) and `agenda://about-this-bot` (a
+description of the bot itself).
+
+### 4. Run the server
 
 MCP supports two main transports: **stdio** (simpler, local only) and **HTTP**
 (for remote servers). We'll show both.
 
-#### 3.1 stdio transport
+#### 4.1 stdio transport
 
 ```python
 if __name__ == "__main__":
@@ -232,7 +253,7 @@ Adjust the paths to match where you cloned the repo. Restart Claude Code and ask
 it about the agenda — it will launch the server and call the MCP tools to
 answer.
 
-#### 3.2 HTTP transport
+#### 4.2 HTTP transport
 
 Change the transport:
 
@@ -287,7 +308,7 @@ the tools at runtime**. It asks the server "what tools do you have?", gets back
 the schemas, and hands them to the LLM. The client no longer needs to know
 anything about the agenda — it only knows how to speak MCP.
 
-Open [src/MCP_client.py](../src/MCP_client.py). Compared to the v1 client, there are four key differences:
+Open [src/MCP_client.py](../src/MCP_client.py). Compared to the v1 client, there are five key differences:
 
 - **Connecting to the server.** `streamable_http_client` + `ClientSession` open
   a connection to the MCP server running on `http://127.0.0.1:8000/mcp`.
@@ -298,18 +319,29 @@ Open [src/MCP_client.py](../src/MCP_client.py). Compared to the v1 client, there
 - **Calling tools.** `session.call_tool(name, args)` runs the tool on the
   server over MCP — the client never imports or executes the Python function
   itself.
+- **Reading resources.** `session.list_resources()` and
+  `session.read_resource(uri)` pull the server's static content at startup.
 
 The tool discovery, schema adaptation, and `bind_tools` call are grouped in a
 small helper, `setup_llm_with_tools(session)`, which returns an LLM ready to
 use. Keeping it as its own function means other entry points (a Telegram bot,
 a web app, …) can reuse the same setup without duplicating code.
 
+### Resources
+
+`fetch_all_resources(session)` lists every resource the server exposes, reads
+each one, and joins the contents under a `## Reference resources` heading. 
+`main()` calls it once at startup and appends the result to `system_prompt`, so every turn sees the same reference context without re-fetching it.
+
+Resources work well for **small, stable content** that the LLM should always
+have on hand, like the event brief or a description of the bot.
+
 ### Conversation memory
 
-`process_query(session, llm_with_tools, query, conversation=None)` takes an
-optional `conversation` list. When provided, prior user/assistant turns from
-it are prepended to the LLM input, and the new `(user question, final answer)`
-pair is appended in place.
+`process_query(session, llm_with_tools, query, system_prompt, conversation=None)`
+takes an optional `conversation` list. When provided, prior user/assistant
+turns from it are prepended to the LLM input, and the new
+`(user question, final answer)` pair is appended in place.
 
 `main()` keeps a single `conversation = []` that grows across queries.
 
@@ -317,7 +349,7 @@ pair is appended in place.
 
 You need **two terminals**: one for the server, one for the client.
 
-In the first terminal, start the MCP server with HTTP (from section 3.2):
+In the first terminal, start the MCP server with HTTP (from section 4.2):
 
 ```bash
 python -m src.MCP_server
