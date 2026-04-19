@@ -34,7 +34,8 @@ system_prompt = (
     "Only use information returned by tool calls or stated earlier in this "
     "conversation. Never invent details such as room, location, description, "
     "requirements, prerequisites, or any other field. If a field is not "
-    "present in the tool result, omit it or say you don't have that information."
+    "present in the tool result, omit it or say you don't have that information. "
+    "Reply in plain text only. Do not use Markdown or any other formatting syntax."
 )
 
 # Telegram bot
